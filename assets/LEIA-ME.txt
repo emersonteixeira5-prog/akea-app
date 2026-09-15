@@ -1,0 +1,11 @@
+Coloque aqui os arquivos de imagem reais da marca:
+
+- icon.png            (1024x1024) — ícone do app
+- adaptive-icon.png   (1024x1024, fundo transparente) — ícone adaptativo Android
+- splash-logo.png     — a arte oficial da splash (camaleão + AKEA + MODA CIRCULAR
+                        sobre fundo amarelo) que você já tem pronta
+- favicon.png         (48x48) — só usado na versão web
+
+O app.json já está configurado pra usar esses nomes de arquivo — assim que
+você colocar os arquivos reais aqui, a splash e os ícones funcionam sem
+precisar mudar mais nada de código.

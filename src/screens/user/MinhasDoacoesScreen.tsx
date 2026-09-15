@@ -1,0 +1,122 @@
+import { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Pressable, ScrollView, ActivityIndicator } from 'react-native';
+import { Feather } from '@expo/vector-icons';
+import { colors, radius } from '@/constants/theme';
+import { supabase, type Donation } from '@/services/supabase';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { UserRootStackParamList } from '@/navigation/UserRootStack';
+import { useLanguage } from '@/i18n';
+
+type Props = NativeStackScreenProps<UserRootStackParamList, 'MinhasDoacoes'>;
+type DonationRow = Donation & { brands: { name: string } | null };
+
+export function MinhasDoacoesScreen({ navigation }: Props) {
+  const { t } = useLanguage();
+  const [donations, setDonations] = useState<DonationRow[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const STATUS_LABELS: Record<Donation['status'], string> = {
+    registered: t('donationStatusRegistered'),
+    received: t('donationStatusReceived'),
+    evaluated: t('donationStatusEvaluated'),
+    transforming: t('donationStatusTransforming'),
+    completed: t('donationStatusCompleted'),
+    rejected: t('donationStatusRejected'),
+  };
+
+  useEffect(() => {
+    loadDonations();
+  }, []);
+
+  async function loadDonations() {
+    setLoading(true);
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) return;
+
+    const { data } = await supabase
+      .from('donations')
+      .select('*, brands(name)')
+      .eq('user_id', userData.user.id)
+      .order('created_at', { ascending: false });
+
+    if (data) setDonations(data as unknown as DonationRow[]);
+    setLoading(false);
+  }
+
+  return (
+    <View style={styles.screen}>
+      <View style={styles.header}>
+        <Pressable onPress={() => navigation.goBack()}>
+          <Feather name="arrow-left" size={20} color={colors.secondary} />
+        </Pressable>
+        <Text style={styles.headerTitle}>{t('myDonations')}</Text>
+        <View style={{ width: 20 }} />
+      </View>
+
+      <ScrollView style={styles.scroll} contentContainerStyle={{ padding: 20 }}>
+        {loading ? (
+          <ActivityIndicator color={colors.secondary} style={{ marginTop: 16 }} />
+        ) : donations.length === 0 ? (
+          <Text style={styles.emptyText}>{t('noDonations')}</Text>
+        ) : (
+          donations.map((donation) => (
+            <Pressable
+              key={donation.id}
+              style={styles.card}
+              onPress={() => navigation.navigate('AcompanharDoacao', { donationId: donation.id })}
+            >
+              <View style={styles.cardTop}>
+                <Text style={styles.brandName}>{donation.brands?.name ?? t('brandFallback')}</Text>
+                <View
+                  style={[
+                    styles.statusBadge,
+                    donation.status === 'completed' && styles.statusBadgeDone,
+                    donation.status === 'rejected' && styles.statusBadgeRejected,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.statusText,
+                      donation.status === 'completed' && styles.statusTextDone,
+                      donation.status === 'rejected' && styles.statusTextRejected,
+                    ]}
+                  >
+                    {STATUS_LABELS[donation.status]}
+                  </Text>
+                </View>
+              </View>
+              <Text style={styles.date}>{new Date(donation.created_at).toLocaleDateString('pt-BR')}</Text>
+              <Text style={styles.materials}>{donation.material_types.join(', ')}</Text>
+            </Pressable>
+          ))
+        )}
+      </ScrollView>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  screen: { flex: 1, backgroundColor: colors.primary },
+  header: {
+    backgroundColor: colors.white,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+  headerTitle: { fontSize: 14, fontWeight: '600', color: colors.secondary },
+  scroll: { flex: 1 },
+  emptyText: { fontSize: 12, color: colors.secondary, opacity: 0.6, textAlign: 'center', marginTop: 20 },
+  card: { backgroundColor: colors.white, borderRadius: radius.lg, padding: 14, marginBottom: 12 },
+  cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
+  brandName: { fontSize: 13, fontWeight: '500', color: colors.secondary },
+  statusBadge: { backgroundColor: colors.surfaceMuted, borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3 },
+  statusBadgeDone: { backgroundColor: colors.successBg },
+  statusBadgeRejected: { backgroundColor: '#FBE4DC' },
+  statusText: { fontSize: 10, fontWeight: '600', color: colors.textMuted },
+  statusTextDone: { color: colors.success },
+  statusTextRejected: { color: colors.danger },
+  date: { fontSize: 10, color: colors.textMuted, marginBottom: 4 },
+  materials: { fontSize: 11, color: colors.secondary },
+});

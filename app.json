@@ -1,0 +1,58 @@
+{
+  "expo": {
+    "name": "AKEA Moda Circular",
+    "slug": "akea-moda-circular",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash-logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#F9EE77"
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "O app precisa de acesso à galeria para você enviar fotos de produtos, doações e perfil."
+        }
+      ],
+      "expo-font",
+      "expo-localization",
+      "expo-status-bar",
+      "expo-video"
+    ],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.akea.modacircular",
+      "infoPlist": {
+        "LSApplicationQueriesSchemes": [
+          "instagram"
+        ]
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#F9EE77"
+      },
+      "package": "com.akea.modacircular",
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "d9ac929f-1326-4341-b75b-fdf38bb41b73"
+      }
+    },
+    "owner": "botsan"
+  }
+}
