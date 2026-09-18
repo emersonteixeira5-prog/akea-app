@@ -3,6 +3,7 @@ import { View, Text, TextInput, StyleSheet, Pressable, ActivityIndicator, Image 
 import { Feather } from '@expo/vector-icons';
 import { colors, radius } from '@/constants/theme';
 import { AuthScreenLayout } from '@/components/AuthScreenLayout';
+import { LanguageToggle } from '@/components/LanguageToggle';
 import { supabase, isSupabaseConfigured } from '@/services/supabase';
 import { useLanguage } from '@/i18n';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -96,6 +97,10 @@ export function CadastroScreen({ navigation }: Props) {
 
   return (
     <AuthScreenLayout>
+      <View style={styles.langRow}>
+        <LanguageToggle />
+      </View>
+
       <View style={styles.header}>
         <View style={styles.iconBadge}>
           <Image
@@ -188,6 +193,7 @@ export function CadastroScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
+  langRow: { alignItems: 'flex-end', marginBottom: 12 },
   header: { alignItems: 'center', marginBottom: 18 },
   iconBadge: {
     width: 56,

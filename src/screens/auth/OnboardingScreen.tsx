@@ -6,6 +6,7 @@ import {
 import { StatusBar } from 'expo-status-bar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors } from '@/constants/theme';
+import { LanguageToggle } from '@/components/LanguageToggle';
 import { useLanguage, type TranslationKey } from '@/i18n';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { AuthStackParamList } from '@/navigation/AuthStack';
@@ -99,6 +100,8 @@ export function OnboardingScreen({ navigation }: Props) {
         )}
       />
 
+      <LanguageToggle style={styles.langToggle} />
+
       <View style={styles.dots}>
         {SLIDES.map((_, i) => (
           <View key={i} style={[styles.dot, i === currentIndex && styles.dotActive]} />
@@ -155,6 +158,9 @@ const styles = StyleSheet.create({
   },
   title: { color: colors.white, fontSize: 26, fontWeight: '700', textAlign: 'center', marginBottom: 10 },
   subtitle: { color: colors.white, opacity: 0.85, fontSize: 14, textAlign: 'center', lineHeight: 22 },
+  // Sobre a foto do slide, no canto oposto ao 'Pular' — é a primeira tela
+  // que um visitante vê, então a troca de idioma precisa estar visível aqui.
+  langToggle: { position: 'absolute', top: 16, right: 16 },
   dots: { flexDirection: 'row', justifyContent: 'center', gap: 6, marginTop: 20 },
   dot: { width: 8, height: 4, borderRadius: 4, backgroundColor: colors.secondary, opacity: 0.3 },
   dotActive: { width: 20, opacity: 1 },

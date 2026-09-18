@@ -941,29 +941,49 @@ let currentLang: Lang = 'pt';
 const listeners: Array<() => void> = [];
 
 export async function loadLanguage() {
-  const saved = await AsyncStorage.getItem(LANG_KEY);
+  let saved: string | null = null;
+  try {
+    saved = await AsyncStorage.getItem(LANG_KEY);
+  } catch {
+    // Navegador com armazenamento bloqueado (aba anônima, cookies de
+    // terceiros barrados) faz o getItem rejeitar. Sem esse catch a Promise
+    // estourava e os listeners no fim nunca rodavam: o app ficava preso no
+    // idioma inicial, sem erro visível na tela.
+  }
+
   if (saved === 'pt' || saved === 'es') {
     // Escolha manual do usuário sempre prevalece sobre a detecção automática.
     currentLang = saved;
   } else {
     // Sem escolha salva ainda — detecta pelo idioma do dispositivo.
-    // `languageCode` já vem normalizado ('es' pra qualquer variante
-    // regional: es-CO, es-MX, es-AR etc.), então checar só isso cobre
-    // toda a América Latina hispanofalante sem precisar de uma lista
-    // de países.
+    // O `languageCode` já vem normalizado ('pt' pra pt-BR e pt-PT, 'es' pra
+    // qualquer variante regional: es-CO, es-MX, es-AR etc.), então checar só
+    // isso cobre toda a América Latina sem precisar de lista de países.
+    //
+    // O fallback é espanhol, não português: só quem está de fato com o
+    // aparelho em português vê português. Antes era o contrário, e aí um
+    // colombiano com o navegador em inglês — situação comum — abria o app
+    // inteiro em português e não tinha como trocar antes de fazer login.
     const deviceLang = Localization.getLocales()[0]?.languageCode;
-    currentLang = deviceLang === 'es' ? 'es' : 'pt';
+    currentLang = deviceLang === 'pt' ? 'pt' : 'es';
   }
   // Notifica quem já montou useLanguage() antes dessa Promise resolver —
-  // sem isso, telas que já renderizaram ficavam presas no idioma padrão
-  // 'pt' até o usuário trocar manualmente (loadLanguage nunca disparava
+  // sem isso, telas que já renderizaram ficavam presas no idioma inicial
+  // até o usuário trocar manualmente (loadLanguage nunca disparava
   // os listeners antes desse fix).
   listeners.forEach((fn) => fn());
 }
 
 export async function setLanguage(lang: Lang) {
   currentLang = lang;
-  await AsyncStorage.setItem(LANG_KEY, lang);
+  try {
+    await AsyncStorage.setItem(LANG_KEY, lang);
+  } catch {
+    // Se a gravação falhar, a troca ainda vale pra sessão atual — o que não
+    // pode é a tela deixar de atualizar. Por isso os listeners ficam fora
+    // do try: antes, um setItem que rejeitasse abortava a função e o botão
+    // de idioma parecia não fazer nada.
+  }
   listeners.forEach(fn => fn());
 }
 

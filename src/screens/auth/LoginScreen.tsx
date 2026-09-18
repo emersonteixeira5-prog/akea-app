@@ -3,6 +3,7 @@ import { View, Text, TextInput, StyleSheet, Pressable, ActivityIndicator, Image 
 import { Feather } from '@expo/vector-icons';
 import { colors, radius } from '@/constants/theme';
 import { AuthScreenLayout } from '@/components/AuthScreenLayout';
+import { LanguageToggle } from '@/components/LanguageToggle';
 import { supabase, isSupabaseConfigured } from '@/services/supabase';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { AuthStackParamList } from '@/navigation/AuthStack';
@@ -73,6 +74,10 @@ export function LoginScreen({ navigation }: Props) {
 
   return (
     <AuthScreenLayout>
+      <View style={styles.langRow}>
+        <LanguageToggle />
+      </View>
+
       {!isSupabaseConfigured && (
         <View style={styles.warningBanner}>
           <Feather name="alert-triangle" size={14} color={colors.secondary} />
@@ -177,6 +182,7 @@ const styles = StyleSheet.create({
     color: colors.secondary,
     flex: 1,
   },
+  langRow: { alignItems: 'flex-end', marginBottom: 12 },
   header: { alignItems: 'center', marginBottom: 28 },
   iconBadge: {
     width: 56,
